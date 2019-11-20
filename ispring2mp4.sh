@@ -20,7 +20,7 @@ rm *.png
 gswin64c -sDEVICE=png16m -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -dSAFER -dBATCH -dNOPAUSE -o img%01d.png -r96 $class_name.pdf
 
 number=$(find . -name '*.png' -type f | wc -l)
-dir=$(find . -maxdepth 0 -printf "%f\n")
+dir=$(find $PWD -maxdepth 0 -printf "%f\n")
 
 rm *.ogg
 for (( h = 1; h <= $number; h++ ))
@@ -45,7 +45,8 @@ done
 
 ffmpeg -f concat -safe 0 -i vlist.txt -vcodec libx264 -crf 25 -preset medium -tune stillimage -profile:v baseline -level 3.0 -vf "fps=30000/1001,format=yuv420p" out.mp4
 ffmpeg -f concat -safe 0 -i alist.txt -acodec aac -ab 192k -ac 2 -ar 44100 -absf aac_adtstoasc -async 1 out.aac
-ffmpeg -i out.mp4 -i out.aac -map 0:0 -map 1:0 -c:v copy -c:a copy ../$dir.mp4
+ffmpeg-normalize out.aac -o out-normal.m4a -c:a aac
+ffmpeg -i out.mp4 -i out-normal.m4a -map 0:0 -map 1:0 -c:v copy -c:a copy ../$dir.mp4
 
 cd ..
 mpv $dir.mp4
